@@ -20,11 +20,6 @@ const Simulation = () => {
           >
             M/M/1
           </Link>
-          <Link to="MMC"
-            className="text-blue-500 hover:text-blue-700 underline"
-          >
-            M/M/C
-          </Link>
         </div>
 
       <Outlet/>

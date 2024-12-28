@@ -23,9 +23,9 @@ const HeroSection = () => {
               >
                 Simulation
               </Link>
-              <button className="bg-gray-200 text-blue-600 px-8 py-3 rounded-lg shadow-lg hover:bg-gray-300 transition duration-300">
+              <Link to="/Queuing" className="bg-gray-200 text-blue-600 px-8 py-3 rounded-lg shadow-lg hover:bg-gray-300 transition duration-300">
                 Queuing Modals
-              </button>
+              </Link>
             </div>
           </div>
           <div className="mt-8 md:mt-0 md:w-1/2">

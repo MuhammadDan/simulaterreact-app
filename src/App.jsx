@@ -6,6 +6,8 @@ import Simulation from './Components/Simulation'; // Import the Simulation compo
 import { Routes, Route } from "react-router-dom";
 import MM1 from "./Components/MM1";
 import MMC from "./Components/MMC";
+import MGC from "./Components/MGC";
+import Queuing from "./Components/Queuing";
 // import MM1 from "";
 // import MMC from "./Components/MMC";
 
@@ -25,9 +27,12 @@ function App() {
         } />
         <Route path="/simulation" element={<Simulation />} >
           <Route path="MM1" element={<MM1/>} />
-          <Route path="MMC" element={<MMC/>} />
-        
+          
         </Route>
+        <Route path="/Queuing" element={<Queuing />} >
+        <Route path="MMC" element={<MMC/>} />
+          <Route path="MGC" element={<MGC/>} />
+          </Route>
         
       </Routes>
 
