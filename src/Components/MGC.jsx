@@ -1,151 +1,152 @@
-import React from 'react'
-import { useState } from 'react';
+import React from "react";
+
 const MGC = () => {
-  const [arrivalRate, setArrivalRate] = useState(); // λ
-  const [serviceRate, setServiceRate] = useState(); // μ
-  const [variance, setVariance] = useState(); // Variance of service time
-  const [results, setResults] = useState(null);
-  const [error, setError] = useState(null);
-  console.log(arrivalRate)
-  console.log(serviceRate)
-  console.log(variance)
-
-  const calculateMetrics = () => {
-    setError(null);
-
-    if (serviceRate <= 0 || arrivalRate <= 0) {
-      setError("Arrival rate and service rate must be greater than 0.");
-      return;
+  const factorial = (n) => {
+    if (n === 0) {
+      return 1;
     }
-
-    if (arrivalRate >= serviceRate) {
-      setError("The system becomes unstable when arrival rate >= service rate.");
-      return;
+    if (n > 0) {
+      return n * factorial(n - 1);
     }
-
-    // Utilization (ρ)
-    const utilization = (arrivalRate / serviceRate);
-
-    // Average waiting time in the queue (Wq)
-    const averageWaitInQueue =
-      (utilization * (1 + variance * serviceRate ** 2)) /
-      (2 * (1 - utilization));
-
-    // Average waiting time in the system (Ws)
-    const averageWaitInSystem = averageWaitInQueue + 1 / serviceRate;
-
-    // Average number of items in the queue (Lq)
-    const averageItemsInQueue = arrivalRate * averageWaitInQueue;
-
-    // Average number of items in the system (Ls)
-    const averageItemsInSystem = arrivalRate * averageWaitInSystem;
-
-    // Probability of the server being idle (1 - ρ)
-    const idleProbability = 1 - utilization;
-
-    setResults({
-      Wq: averageWaitInQueue,
-      Ws: averageWaitInSystem,
-      rho: utilization,
-      Lq: averageItemsInQueue,
-      Ls: averageItemsInSystem,
-      idle: idleProbability,
-    });
   };
-      
-  return  (<div className="min-h-screen bg-gray-100 flex items-center justify-center">
-  <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
-    <h1 className="text-2xl font-bold mb-4">M/G/C Queue Simulator</h1>
 
-    <div className="mb-4">
-      <label className="block text-gray-700 font-medium mb-2">
-        Arrival Rate (λ)
-      </label>
-      <input
-        type="number"
-        value={arrivalRate}
-        onChange={(e) => setArrivalRate(parseFloat(e.target.value))}
-        className="w-full p-2 border border-gray-300 rounded-md"
-        placeholder="Enter arrival rate (e.g., 5)"
-      />
-    </div>
+  function calculatePo(c, rho) {
+    let res = 0;
+    for (let n = 0; n < c; n++) {
+      res += Math.pow(c * rho, n) / factorial(n);
+    }
+    return 1 / (res + Math.pow(c * rho, c) / (factorial(c) * (1 - rho)));
+  }
 
-    <div className="mb-4">
-      <label className="block text-gray-700 font-medium mb-2">
-        Service Rate (μ)
-      </label>
-      <input
-        type="number"
-        value={serviceRate}
-        onChange={(e) => setServiceRate(parseFloat(e.target.value))}
-        className="w-full p-2 border border-gray-300 rounded-md"
-        placeholder="Enter service rate (e.g., 8)"
-      />
-    </div>
+  const calculateCsSquare = (variance, mue) => {
+    return variance / Math.pow(1 / mue, 2);
+  };
 
-    <div className="mb-4">
-      <label className="block text-gray-700 font-medium mb-2">
-        Variance of Service Time (Var[S])
-      </label>
-      <input
-        type="number"
-        value={variance}
-        onChange={(e) => setVariance(parseFloat(e.target.value))}
-        className="w-full p-2 border border-gray-300 rounded-md"
-        placeholder="Enter variance (e.g., 0.5)"
-      />
-    </div>
+  const calculateMGC = (meanArrivalTime, minServiceTime, maxServiceTime, servers) => {
+    meanArrivalTime = parseFloat(1 / meanArrivalTime);
+    let meanServiceTime = 1 / ((+minServiceTime + +maxServiceTime) / 2);
+    servers = parseInt(servers);
 
-    {error && <p className="text-red-500 mb-4">{error}</p>}
+    const rho = +(meanArrivalTime / (servers * meanServiceTime)).toFixed(1);
+    if (rho < 1) {
+      const idle = +(1 - rho).toFixed(1);
+      const variance = Math.pow(maxServiceTime - minServiceTime, 2) / 12;
+      const cs2 = calculateCsSquare(variance, meanServiceTime);
+      const Lq = +(
+        (calculatePo(servers, rho) *
+          Math.pow(meanArrivalTime / meanServiceTime, servers) *
+          rho) /
+        (factorial(servers) * Math.pow(1 - rho, 2)) *
+        ((cs2 + 1) / 2)
+      ).toFixed(1);
+      const Wq = +(Lq / meanArrivalTime).toFixed(2);
+      const Ws = +(Wq + 1 / meanServiceTime).toFixed(2);
+      const Ls = +(meanArrivalTime * Ws).toFixed(2);
 
-    <button
-      onClick={calculateMetrics}
-      className="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600"
-    >
-      Calculate
-    </button>
+      return {
+        rho,
+        idle,
+        Wq,
+        Lq,
+        Ws,
+        Ls,
+      };
+    } else {
+      console.log("This is not a valid queuing model.");
+    }
+  };
 
-    {results && !error && (
-      <div className="mt-4">
-        <table className="w-full text-left border-collapse">
+  const handleCalculate = () => {
+    const arrivalRate = parseFloat(document.getElementById("arrivalRate").value);
+    const minServiceRate = parseFloat(document.getElementById("minServiceRate").value);
+    const maxServiceRate = parseFloat(document.getElementById("maxServiceRate").value);
+    const servers = parseInt(document.getElementById("servers").value);
+
+    const results = calculateMGC(arrivalRate, minServiceRate, maxServiceRate, servers);
+
+    if (results) {
+      const resultDiv = document.getElementById("results");
+      resultDiv.innerHTML = `
+        <table class="w-full text-center border-collapse">
           <thead>
-            <tr className="bg-blue-200">
-              <th className="border px-4 py-2">Metric</th>
-              <th className="border px-4 py-2">Value</th>
+            <tr class="bg-black text-white">
+              <th class="border px-4 py-2">Utilization (ρ)</th>
+              <th class="border px-4 py-2">Average Queue Length (Lq)</th>
+              <th class="border px-4 py-2">Average Number in System (L)</th>
+              <th class="border px-4 py-2">Average Waiting Time in Queue (Wq)</th>
+              <th class="border px-4 py-2">Average Time in System (W)</th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <td className="border px-4 py-2">Average Waiting Time in Queue (Wq)</td>
-              <td className="border px-4 py-2">{results.Wq.toFixed(2)}</td>
-            </tr>
-            <tr>
-              <td className="border px-4 py-2">Average Waiting Time in System (Ws)</td>
-              <td className="border px-4 py-2">{results.Ws.toFixed(2)}</td>
-            </tr>
-            <tr>
-              <td className="border px-4 py-2">Server Utilization (ρ)</td>
-              <td className="border px-4 py-2">{results.rho.toFixed(2)}</td>
-            </tr>
-            <tr>
-              <td className="border px-4 py-2">Average Number in Queue (Lq)</td>
-              <td className="border px-4 py-2">{results.Lq.toFixed(2)}</td>
-            </tr>
-            <tr>
-              <td className="border px-4 py-2">Average Number in System (Ls)</td>
-              <td className="border px-4 py-2">{results.Ls.toFixed(2)}</td>
-            </tr>
-            <tr>
-              <td className="border px-4 py-2">Idle Probability</td>
-              <td className="border px-4 py-2">{results.idle.toFixed(2)}</td>
+              <td class="border px-4 py-2">${results.rho}</td>
+              <td class="border px-4 py-2">${results.Lq}</td>
+              <td class="border px-4 py-2">${results.Ls}</td>
+              <td class="border px-4 py-2">${results.Wq}</td>
+              <td class="border px-4 py-2">${results.Ws}</td>
             </tr>
           </tbody>
         </table>
-      </div>
-    )}
-  </div>
-</div>
-  )
-}
+      `;
+    }
+  };
 
-export default MGC
+  return (
+    <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+      <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
+        <h1 className="text-2xl font-bold mb-4">M/G/C Queue Simulator</h1>
+
+        <div className="mb-4">
+          <label className="block text-gray-700 font-medium mb-2">Arrival Time</label>
+          <input
+            type="number"
+            id="arrivalRate"
+            className="w-full p-2 border border-gray-300 rounded-md"
+            placeholder="Enter arrival rate (e.g., 5)"
+          />
+        </div>
+
+        <div className="mb-4">
+          <label className="block text-gray-700 font-medium mb-2">Min Service Time</label>
+          <input
+            type="number"
+            id="minServiceRate"
+            className="w-full p-2 border border-gray-300 rounded-md"
+            placeholder="Enter min service rate (e.g., 2)"
+          />
+        </div>
+
+        <div className="mb-4">
+          <label className="block text-gray-700 font-medium mb-2">Max Service Time</label>
+          <input
+            type="number"
+            id="maxServiceRate"
+            className="w-full p-2 border border-gray-300 rounded-md"
+            placeholder="Enter max service rate (e.g., 6)"
+          />
+        </div>
+
+        <div className="mb-4">
+          <label className="block text-gray-700 font-medium mb-2">Number of Servers (C)</label>
+          <input
+            type="number"
+            id="servers"
+            className="w-full p-2 border border-gray-300 rounded-md"
+            placeholder="Enter number of servers (e.g., 3)"
+          />
+        </div>
+
+        <button
+          onClick={handleCalculate}
+          className="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600"
+        >
+          Calculate
+        </button>
+
+        <div id="results" className="mt-4"></div>
+      </div>
+    </div>
+  );
+};
+
+export default MGC;

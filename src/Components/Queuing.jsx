@@ -15,6 +15,11 @@ const Queuing = () => {
           >
             M/G/C
           </Link>
+          <Link to="GGC"
+            className="text-blue-500 hover:text-blue-700 underline"
+          >
+            G/G/C
+          </Link>
           </div>
           <Outlet />
     </div>
