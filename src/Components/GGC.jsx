@@ -1,165 +1,191 @@
-import React from "react";
+import React, { useState } from "react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  TextField,
+  Button,
+  styled,
+} from "@mui/material";
 
-const GGC = () => {
-  function factorial(n) {
-    if (n < 0) return 1; // Safeguard for invalid input
-    if (n === 0) return 1;
+// Styled components
+const StyledTableCell = styled(TableCell)(() => ({
+  [`&.MuiTableCell-head`]: {
+    backgroundColor: "#065F46",
+    color: "white",
+  },
+  [`&.MuiTableCell-body`]: {
+    fontSize: 14,
+  },
+}));
+
+const StyledTableRow = styled(TableRow)(() => ({
+  "&:hover": {
+    backgroundColor: "#065F46",
+  },
+  "&:last-child td, &:last-child th": {
+    border: 0,
+  },
+}));
+
+// Helper functions
+function factorial(n) {
+  if (n === 0) {
+    return 1;
+  }
+  if (n > 0) {
     return n * factorial(n - 1);
   }
+}
 
-  const calculatePo = (c, rho) => {
-    let res = 0;
-    for (let n = 0; n < c; n++) {
-      res += Math.pow(c * rho, n) / factorial(n);
-    }
-    return 1 / (res + (Math.pow(c * rho, c) / (factorial(c) * (1 - rho))));
-  };
+function calculatePo(c, rho) {
+  let res = 0;
+  for (let n = 0; n < c; n++) {
+    res += Math.pow(c * rho, n) / factorial(n);
+  }
+  return 1 / (res + Math.pow(c * rho, c) / (factorial(c) * (1 - rho)));
+}
 
-  const calculateGGC = (meanArrival, meanService, arrivalVariance, serviceVariance, servers) => {
-    const lambda = 1 / meanArrival;
-    const mu = 1 / meanService;
-    const ca = arrivalVariance / Math.pow(lambda, 2);
-    const cs = serviceVariance / Math.pow(mu, 2);
-    const rho = lambda / (servers * mu);
+function calculateGGC(meanArrival, meanService, ArrivalVariance, ServiceVariance, servers) {
+  meanArrival = 1 / +meanArrival;
+  meanService = 1 / +meanService;
+  const ca = +ArrivalVariance / Math.pow(1 / meanArrival, 2);
+  const cs = +ServiceVariance / Math.pow(1 / meanService, 2);
+  const rho = meanArrival / (servers * meanService);
+  const idle = +(1 - rho).toFixed(2);
 
-    if (rho >= 1) {
-      console.error("System is unstable. Utilization (\u03C1) must be less than 1.");
-      return null;
-    }
+  if (rho < 1) {
+    const expaverageQueueLengthQueue =
+      (calculatePo(servers, rho) * Math.pow(meanArrival / meanService, servers) * rho) /
+      (factorial(servers) * Math.pow(1 - rho, 2));
 
-    const Po = calculatePo(servers, rho);
-    const avgQueueLength = (Po * Math.pow(lambda / mu, servers) * rho) / (factorial(servers) * Math.pow(1 - rho, 2));
-    const Lq = +(avgQueueLength * (ca + cs) / 2).toFixed(2);
-    const Wq = +(Lq / lambda).toFixed(2);
-    const Ws = +(Wq + 1 / mu).toFixed(2);
-    const Ls = +(lambda * Ws).toFixed(2);
-    const idle = +(1 - rho).toFixed(2);
+    const Lq = +(expaverageQueueLengthQueue * ((ca + cs) / 2)).toFixed(2);
+    const Wq = +(Lq / meanArrival).toFixed(2);
+    const Ws = +(Wq + 1 / meanService).toFixed(2);
+    const Ls = +(meanArrival * Ws).toFixed(2);
 
     return {
-      rho: +rho.toFixed(2),
+      rho,
       idle,
-      Lq,
       Wq,
+      Lq,
       Ws,
       Ls,
     };
+  } else {
+    console.log("This is not a valid queuing model.");
+    return null;
+  }
+}
+
+// Main component
+const QueueGGC = () => {
+  const [formData, setFormData] = useState({});
+  const [data, setData] = useState(null);
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
   };
 
-  const handleCalculate = () => {
-    const meanArrival = parseFloat(document.getElementById("meanArrival").value);
-    const meanService = parseFloat(document.getElementById("meanService").value);
-    const arrivalVariance = parseFloat(document.getElementById("arrivalVariance").value);
-    const serviceVariance = parseFloat(document.getElementById("serviceVariance").value);
-    const servers = parseInt(document.getElementById("servers").value, 10);
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const { ArrivalMean, ServiceMean, ArrivalVariance, ServiceVariance, Servers } = formData;
 
-    if (
-      isNaN(meanArrival) ||
-      isNaN(meanService) ||
-      isNaN(arrivalVariance) ||
-      isNaN(serviceVariance) ||
-      isNaN(servers)
-    ) {
-      alert("Please enter valid inputs for all fields.");
-      return;
-    }
+    const model = calculateGGC(
+      ArrivalMean,
+      ServiceMean,
+      ArrivalVariance,
+      ServiceVariance,
+      Servers
+    );
 
-    const results = calculateGGC(meanArrival, meanService, arrivalVariance, serviceVariance, servers);
-
-    if (results) {
-      const resultDiv = document.getElementById("results");
-      resultDiv.innerHTML = `
-        <table class="w-full text-center border-collapse">
-          <thead>
-            <tr class="bg-black text-white">
-              <th class="border px-4 py-2">Utilization (\u03C1)</th>
-              <th class="border px-4 py-2">Idle Probability</th>
-              <th class="border px-4 py-2">Average Queue Length (Lq)</th>
-              <th class="border px-4 py-2">Average Waiting Time in Queue (Wq)</th>
-              <th class="border px-4 py-2">Average Time in System (Ws)</th>
-              <th class="border px-4 py-2">Average Number in System (Ls)</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td class="border px-4 py-2">${results.rho}</td>
-              <td class="border px-4 py-2">${results.idle}</td>
-              <td class="border px-4 py-2">${results.Lq}</td>
-              <td class="border px-4 py-2">${results.Wq}</td>
-              <td class="border px-4 py-2">${results.Ws}</td>
-              <td class="border px-4 py-2">${results.Ls}</td>
-            </tr>
-          </tbody>
-        </table>
-      `;
-    }
+    setData(model);
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-      <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
-        <h1 className="text-2xl font-bold mb-4">G/G/C Queue Simulator</h1>
+    <div style={{ padding: "20px" }}>
+      <h1>G/G/c Queuing Model Simulator</h1>
+      <form onSubmit={handleSubmit} style={{ marginBottom: "20px" }}>
+        <TextField
+          label="Arrival Mean"
+          name="ArrivalMean"
+          type="number"
+          required
+          fullWidth
+          margin="normal"
+          onChange={handleInputChange}
+        />
+        <TextField
+          label="Service Mean"
+          name="ServiceMean"
+          type="number"
+          required
+          fullWidth
+          margin="normal"
+          onChange={handleInputChange}
+        />
+        <TextField
+          label="Arrival Variance (in minutes)"
+          name="ArrivalVariance"
+          type="number"
+          required
+          fullWidth
+          margin="normal"
+          onChange={handleInputChange}
+        />
+        <TextField
+          label="Service Variance (in minutes)"
+          name="ServiceVariance"
+          type="number"
+          required
+          fullWidth
+          margin="normal"
+          onChange={handleInputChange}
+        />
+        <TextField
+          label="Number of Servers"
+          name="Servers"
+          type="number"
+          required
+          fullWidth
+          margin="normal"
+          onChange={handleInputChange}
+        />
+        <Button type="submit" variant="contained" color="primary" fullWidth>
+          Submit
+        </Button>
+      </form>
 
-        <div className="mb-4">
-          <label className="block text-gray-700 font-medium mb-2">Arrival Mean</label>
-          <input
-            type="number"
-            id="meanArrival"
-            className="w-full p-2 border border-gray-300 rounded-md"
-            placeholder="Enter arrival mean (e.g., 5)"
-          />
-        </div>
-
-        <div className="mb-4">
-          <label className="block text-gray-700 font-medium mb-2">Service Mean</label>
-          <input
-            type="number"
-            id="meanService"
-            className="w-full p-2 border border-gray-300 rounded-md"
-            placeholder="Enter service mean (e.g., 2)"
-          />
-        </div>
-
-        <div className="mb-4">
-          <label className="block text-gray-700 font-medium mb-2">Arrival Variance</label>
-          <input
-            type="number"
-            id="arrivalVariance"
-            className="w-full p-2 border border-gray-300 rounded-md"
-            placeholder="Enter arrival variance (e.g., 4)"
-          />
-        </div>
-
-        <div className="mb-4">
-          <label className="block text-gray-700 font-medium mb-2">Service Variance</label>
-          <input
-            type="number"
-            id="serviceVariance"
-            className="w-full p-2 border border-gray-300 rounded-md"
-            placeholder="Enter service variance (e.g., 1)"
-          />
-        </div>
-
-        <div className="mb-4">
-          <label className="block text-gray-700 font-medium mb-2">Number of Servers (C)</label>
-          <input
-            type="number"
-            id="servers"
-            className="w-full p-2 border border-gray-300 rounded-md"
-            placeholder="Enter number of servers (e.g., 3)"
-          />
-        </div>
-
-        <button
-          onClick={handleCalculate}
-          className="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600"
-        >
-          Calculate
-        </button>
-
-        <div id="results" className="mt-4"></div>
-      </div>
+      {data && (
+        <TableContainer component={Paper}>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <StyledTableCell>Metric</StyledTableCell>
+                <StyledTableCell>Value</StyledTableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {Object.entries(data).map(([key, value]) => (
+                <StyledTableRow key={key}>
+                  <StyledTableCell>{key}</StyledTableCell>
+                  <StyledTableCell>{value}</StyledTableCell>
+                </StyledTableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      )}
     </div>
   );
 };
 
-export default GGC;
+export default QueueGGC;
