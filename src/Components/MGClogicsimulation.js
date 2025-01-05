@@ -21,7 +21,7 @@ function factorial(n) {
     }
 }
 
-function generateCummulativeProbability(meanArrivalNumber, meanServiceNumber,serverCount=1, selectedPriority=0) {
+function generateCummulativeProbability(meanArrivalNumber, minServiceNumber,maxServiceNumber,serverCount=1, selectedPriority=0) {
   // Reset all arrays to avoid stale data
   cummulativeProbabilities = [];
   cpLookUp = [];
@@ -35,8 +35,8 @@ function generateCummulativeProbability(meanArrivalNumber, meanServiceNumber,ser
   waitingTime = [];
   responseTime = [];
   table = [];
-  priority = [];
-
+  priority = [];    
+  let meanServiceNumber = (+minServiceNumber + +maxServiceNumber)/2;
   meanArrivalNumber = Number(meanArrivalNumber);
   meanServiceNumber = Number(meanServiceNumber);
   serverCount = Number(serverCount);
@@ -52,28 +52,28 @@ function generateCummulativeProbability(meanArrivalNumber, meanServiceNumber,ser
 
   // Generate service times
   for (let i = 0; i < cummulativeProbabilities.length; i++) {
-      let result = Math.round(-meanServiceNumber * Math.log(Math.random()));
+      let result = Math.round((+minServiceNumber + (+maxServiceNumber - +minServiceNumber)* Math.random()));
       while (result < 1) {
-          result = Math.round(-meanServiceNumber * Math.log(Math.random()));
+          result = Math.round((+minServiceNumber + (+maxServiceNumber - +minServiceNumber)* Math.random()));
       }
       serviceTime.push(result);
   }
 
   // Calling CP Lookup Table
-  CP_LookUp(cummulativeProbabilities);
+//   CP_LookUp(cummulativeProbabilities);
 
   // Generate minimum number of arrivals
-  genMinNoOfArrival();
+//   genMinNoOfArrival();
 
   // Calling Priority Generator
   if (selectedPriority === 1) {
-      PriorityGeneration(55, 1994, 9, 10112166, minNoOfArrival.length, 1, 3);
+      PriorityGeneration(55, 1994, 9, 10112166, cummulativeProbabilities.length, 1, 3);
   }
 
   // Generate inter-arrival times
   interArrival[0] = 0;
-  for (let i = 1; i < minNoOfArrival.length; i++) {
-      const result = generateInterArrival(cpLookUp, cummulativeProbabilities, minNoOfArrival);
+  for (let i = 1; i < cummulativeProbabilities.length; i++) {
+      const result = generateInterArrival(meanArrivalNumber);
       interArrival.push(result);
   }
 
@@ -85,8 +85,10 @@ function generateCummulativeProbability(meanArrivalNumber, meanServiceNumber,ser
   const gantChart = calculateMultiServerSchedule(arrivalTime, serviceTime, priority, serverCount);
   const {mergedCombinedChart,ganttCharts } = gantChart;
 
+
   // Calculate performance measures
   performanceMeasures(arrivalTime, serviceTime, mergedCombinedChart, selectedPriority);
+ 
   const totalServiceTime = serviceTime.reduce((a, b) => a + b, 0);
   const serverTotalServiceTime = ganttCharts.map(serverTasks => {
     return serverTasks.reduce((total, task) => total + (task.end_Time - task.start_Time), 0);
@@ -133,33 +135,32 @@ function generateCummulativeProbability(meanArrivalNumber, meanServiceNumber,ser
       priority,
       table,
       serverCount,
-      ganttCharts
-    //   serverSchedules
+      ganttCharts,
+      // serverSchedules
   };
 }
-function CP_LookUp(cummulativeProbabilities) {
-      cpLookUp[0] = 0;
-      for (let i = 0; i < cummulativeProbabilities.length - 1; i++) {
-          cpLookUp.push(cummulativeProbabilities[i]);
-      }
-  }
+// function CP_LookUp(cummulativeProbabilities) {
+//       cpLookUp[0] = 0;
+//       for (let i = 0; i < cummulativeProbabilities.length - 1; i++) {
+//           cpLookUp.push(cummulativeProbabilities[i]);
+//       }
+//   }
   
-  function genMinNoOfArrival() {
-      for (let i = 0; i < cummulativeProbabilities.length; i++) {
-          minNoOfArrival.push(i);
-      }
-  }
+//   function genMinNoOfArrival() {
+//       for (let i = 0; i < cummulativeProbabilities.length; i++) {
+//           minNoOfArrival.push(i);
+//       }
+//   }
   
-  function generateInterArrival(cpTable, cummulativeProbabilities, minNoOfArrival) {
-      while (true) {
-          let genIA = Number(Math.random().toFixed(4));
-          for (let i = 1; i < cpTable.length; i++) {
-              if (cpTable[i] <= genIA && genIA < cummulativeProbabilities[i]) {
-                  return minNoOfArrival[i];
-              }
-          }
-      }
-  }
+  function generateInterArrival(lambda) {
+   let result = Math.round(-lambda * Math.log(Math.random()));
+    while (result < 1) {
+      result = Math.round(-lambda * Math.log(Math.random()));
+    } 
+    return result
+}
+
+  
   
   function performanceMeasures(arrivalTime, serviceTime,ganttChart,selectedPriority) {
     if(selectedPriority ===1){
@@ -178,7 +179,7 @@ function CP_LookUp(cummulativeProbabilities) {
       const filteredGanttChart = ganttChart.filter(entry => 
         entry.priority === 1 || entry.priority === 2 || entry.priority === 3
       );
-    //   console.log("FIltered",filteredGanttChart)
+      // console.log("FIltered",filteredGanttChart)
       // Process Start Time
       filteredGanttChart.forEach((entry) => {
         if (!processedCustomersStart.has(entry.customer_Id)) {
@@ -263,7 +264,6 @@ function calculateMultiServerSchedule(arrivalTimes, serviceTimes, priorities, nu
     // Function to add customers to the queue when they arrive
     const addToQueue = (currentTime) => {
       customers.forEach((customer) => {
-        console.log(currentTime );
         if (
           customer.arrivalTime <= currentTime &&
           customer.serviceTime > 0 &&

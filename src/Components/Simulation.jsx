@@ -26,6 +26,12 @@ const Simulation = () => {
           >
             M/M/C
           </Link>
+          <Link to="MGCSimulation"
+            // onClick={handleMM1Click}
+            className="text-blue-500 hover:text-blue-700 underline"
+          >
+            M/G/C
+          </Link>
         </div>
 
       <Outlet/>

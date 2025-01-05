@@ -10,6 +10,7 @@ import MGC from "./Components/MGC";
 import Queuing from "./Components/Queuing";
 import GGC from "./Components/GGC";
 import MMCSimulation from "./Components/MMCSimulation";
+import MGCSimulation from "./Components/MGCSimulation";
 // import MM1 from "";
 // import MMC from "./Components/MMC";
 
@@ -30,6 +31,7 @@ function App() {
         <Route path="/simulation" element={<Simulation />} >
           <Route path="MM1" element={<MM1/>} />
           <Route path="MMCSimulation" element={<MMCSimulation/>} />
+          <Route path="MGCSimulation" element={<MGCSimulation/>} />
           
         </Route>
         <Route path="/Queuing" element={<Queuing />} >

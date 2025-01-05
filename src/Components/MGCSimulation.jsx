@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import generateCummulativeProbability from './MMClogicsimulation.js'
+import generateCummulativeProbability from './MGClogicsimulation.js'
 import { Paper, Table, TableContainer, TableHead,TableBody, TableRow } from '@mui/material';
 import TableCell, { tableCellClasses } from '@mui/material/TableCell';
 import { styled } from '@mui/material/styles';
@@ -21,7 +21,7 @@ const StyledTableCell = styled(TableCell)(({ }) => ({
       border: 0,
     },
 }));
-const MMCSimulation = () => {
+const MGCSimulation = () => {
     const [showsecondform, setShowSecondForm] = useState(true);
     const [data,setData] = useState({});
     const [row,setRow] = useState([]);
@@ -34,9 +34,9 @@ const MMCSimulation = () => {
     const handleSubmit = (e) =>{
         e.preventDefault();
         console.log(data)
-        const {arrivalTime,serviceTime,NumberofServer,priority} = data;
+        const {arrivalTime,minserviceTime,maxserviceTime,NumberofServer,priority} = data;
         console.log(priority)
-        const res = generateCummulativeProbability(arrivalTime,serviceTime,NumberofServer,priority);
+        const res = generateCummulativeProbability(arrivalTime,minserviceTime,maxserviceTime,NumberofServer,priority);
         console.log("res",res);
         setRow(res)
     }
@@ -67,13 +67,30 @@ const MMCSimulation = () => {
                 htmlFor="serviceTime"
                 className="block text-gray-700 text-sm font-bold mb-2"
               >
-                Service Time
+                Min Service Time
               </label>
               <input
                 type="number"
                 onChange={(e)=>(handleChange(e.target.name,e.target.value))}
-                id="serviceTime"
-                name="serviceTime"
+                id="minserviceTime"
+                name="minserviceTime"
+                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                placeholder="Enter service Time"
+              />
+              
+            </div>
+            <div className="mb-4">
+              <label
+                htmlFor="serviceTime"
+                className="block text-gray-700 text-sm font-bold mb-2"
+              >
+                Max Service Time
+              </label>
+              <input
+                type="number"
+                onChange={(e)=>(handleChange(e.target.name,e.target.value))}
+                id="maxserviceTime"
+                name="maxserviceTime"
                 className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                 placeholder="Enter service Time"
               />
@@ -235,4 +252,4 @@ const MMCSimulation = () => {
   )
 }
 
-export default MMCSimulation;
+export default MGCSimulation;
