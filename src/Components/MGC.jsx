@@ -69,13 +69,13 @@ const MGC = () => {
       resultDiv.innerHTML = `
         <table class="w-full text-center border-collapse">
           <thead>
-            <tr class="bg-black text-white">
-              <th class="border px-4 py-2">Utilization (ρ)</th>
-              <th class="border px-4 py-2">Average Queue Length (Lq)</th>
-              <th class="border px-4 py-2">Average Number in System (L)</th>
-              <th class="border px-4 py-2">Average Waiting Time in Queue (Wq)</th>
-              <th class="border px-4 py-2">Average Time in System (W)</th>
-            </tr>
+            <tr style="background-color: #1565c0; color: white;">
+            <th class="border px-4 py-2">Utilization (ρ)</th>
+            <th class="border px-4 py-2">Average Queue Length (Lq)</th>
+            <th class="border px-4 py-2">Average Number in System (L)</th>
+            <th class="border px-4 py-2">Average Waiting Time in Queue (Wq)</th>
+            <th class="border px-4 py-2">Average Time in System (W)</th>
+          </tr>
           </thead>
           <tbody>
             <tr>

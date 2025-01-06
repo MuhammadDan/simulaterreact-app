@@ -14,7 +14,7 @@ import {
 // Styled components
 const StyledTableCell = styled(TableCell)(() => ({
   [`&.MuiTableCell-head`]: {
-    backgroundColor: "#065F46",
+    backgroundColor: "#1565c0",
     color: "white",
   },
   [`&.MuiTableCell-body`]: {
@@ -24,7 +24,7 @@ const StyledTableCell = styled(TableCell)(() => ({
 
 const StyledTableRow = styled(TableRow)(() => ({
   "&:hover": {
-    backgroundColor: "#065F46",
+    backgroundColor: "#1565c0",
   },
   "&:last-child td, &:last-child th": {
     border: 0,
@@ -41,12 +41,12 @@ function factorial(n) {
   }
 }
 
-function calculatePo(c, rho) {
+function calculatePo(c, Utilization_time) {
   let res = 0;
   for (let n = 0; n < c; n++) {
-    res += Math.pow(c * rho, n) / factorial(n);
+    res += Math.pow(c * Utilization_time, n) / factorial(n);
   }
-  return 1 / (res + Math.pow(c * rho, c) / (factorial(c) * (1 - rho)));
+  return 1 / (res + Math.pow(c * Utilization_time, c) / (factorial(c) * (1 - Utilization_time)));
 }
 
 function calculateGGC(meanArrival, meanService, ArrivalVariance, ServiceVariance, servers) {
@@ -54,26 +54,26 @@ function calculateGGC(meanArrival, meanService, ArrivalVariance, ServiceVariance
   meanService = 1 / +meanService;
   const ca = +ArrivalVariance / Math.pow(1 / meanArrival, 2);
   const cs = +ServiceVariance / Math.pow(1 / meanService, 2);
-  const rho = meanArrival / (servers * meanService);
-  const idle = +(1 - rho).toFixed(2);
+  const Utilization_time = meanArrival / (servers * meanService);
+  const Free_time = +(1 - Utilization_time).toFixed(2);
 
-  if (rho < 1) {
+  if (Utilization_time < 1) {
     const expaverageQueueLengthQueue =
-      (calculatePo(servers, rho) * Math.pow(meanArrival / meanService, servers) * rho) /
-      (factorial(servers) * Math.pow(1 - rho, 2));
+      (calculatePo(servers, Utilization_time) * Math.pow(meanArrival / meanService, servers) * Utilization_time) /
+      (factorial(servers) * Math.pow(1 - Utilization_time, 2));
 
-    const Lq = +(expaverageQueueLengthQueue * ((ca + cs) / 2)).toFixed(2);
-    const Wq = +(Lq / meanArrival).toFixed(2);
-    const Ws = +(Wq + 1 / meanService).toFixed(2);
-    const Ls = +(meanArrival * Ws).toFixed(2);
+    const Length_in_Queue = +(expaverageQueueLengthQueue * ((ca + cs) / 2)).toFixed(2);
+    const Wait_in_Queue = +(Length_in_Queue / meanArrival).toFixed(2);
+    const Wait_in_System = +(Wait_in_Queue + 1 / meanService).toFixed(2);
+    const Length_in_System = +(meanArrival * Wait_in_System).toFixed(2);
 
     return {
-      rho,
-      idle,
-      Wq,
-      Lq,
-      Ws,
-      Ls,
+      Utilization_time,
+      Free_time,
+      Wait_in_Queue,
+      Length_in_Queue,
+      Wait_in_System,
+      Length_in_System,
     };
   } else {
     console.log("This is not a valid queuing model.");
@@ -196,4 +196,4 @@ const QueueGGC = () => {
   );
 };
 
-export default QueueGGC;
+export default QueueGGC
