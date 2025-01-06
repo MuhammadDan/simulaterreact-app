@@ -6,8 +6,7 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  Paper,
-  TextField,
+  Paper, 
   Button,
   styled,
 } from "@mui/material";
@@ -111,59 +110,67 @@ const QueueGGC = () => {
   };
 
   return (
-    <div style={{ padding: "20px" }}>
-      <h1>G/G/c Queuing Model Simulator</h1>
-      <form onSubmit={handleSubmit} style={{ marginBottom: "20px" }}>
-        <TextField
-          label="Arrival Mean"
-          name="ArrivalMean"
-          type="number"
-          required
-          fullWidth
-          margin="normal"
-          onChange={handleInputChange}
-        />
-        <TextField
-          label="Service Mean"
-          name="ServiceMean"
-          type="number"
-          required
-          fullWidth
-          margin="normal"
-          onChange={handleInputChange}
-        />
-        <TextField
-          label="Arrival Variance (in minutes)"
-          name="ArrivalVariance"
-          type="number"
-          required
-          fullWidth
-          margin="normal"
-          onChange={handleInputChange}
-        />
-        <TextField
-          label="Service Variance (in minutes)"
-          name="ServiceVariance"
-          type="number"
-          required
-          fullWidth
-          margin="normal"
-          onChange={handleInputChange}
-        />
-        <TextField
-          label="Number of Servers"
-          name="Servers"
-          type="number"
-          required
-          fullWidth
-          margin="normal"
-          onChange={handleInputChange}
-        />
+    <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+      <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
+      <h1 className="text-2xl font-bold mb-4">G/G/c Queuing Model Simulator</h1>
+      <form onSubmit={handleSubmit}>
+       <div className="mb-4">
+          <label className="block text-gray-700 font-medium mb-2">Arrival Mean</label>
+          <input
+           name="ArrivalMean"
+           type="number"
+           onChange={handleInputChange}
+            className="w-full p-2 border border-gray-300 rounded-md"
+            placeholder="Enter arrival rate (e.g., 5)"
+          />
+        </div>
+
+        <div className="mb-4">
+          <label className="block text-gray-700 font-medium mb-2">Service Mean</label>
+          <input
+            name="ServiceMean"
+            type="number"
+            onChange={handleInputChange}
+            className="w-full p-2 border border-gray-300 rounded-md"
+            placeholder="Enter max service rate (e.g., 6)"
+          />
+        </div>
+
+        <div className="mb-4">
+          <label className="block text-gray-700 font-medium mb-2">Arrival Variance (in minutes)</label>
+          <input
+            name="ArrivalVariance"
+            type="number"
+            onChange={handleInputChange}
+            className="w-full p-2 border border-gray-300 rounded-md"
+            placeholder="Enter max service rate (e.g., 6)"
+          />
+        </div>
+
+        <div className="mb-4">
+          <label className="block text-gray-700 font-medium mb-2">Service Variance (in minutes)</label>
+          <input
+            name="ServiceVariance"
+            type="number"
+            onChange={handleInputChange}
+            className="w-full p-2 border border-gray-300 rounded-md"
+            placeholder="Enter number of servers (e.g., 3)"
+          />
+        </div>
+        <div className="mb-4">
+          <label className="block text-gray-700 font-medium mb-2">Number of Servers</label>
+          <input
+           name="Servers"
+           type="number"
+           onChange={handleInputChange}
+            className="w-full p-2 border border-gray-300 rounded-md"
+            placeholder="Enter number of servers (e.g., 3)"
+          />
+        </div>
         <Button type="submit" variant="contained" color="primary" fullWidth>
           Submit
         </Button>
-      </form>
-
+        </form>
       {data && (
         <TableContainer component={Paper}>
           <Table>
@@ -184,6 +191,7 @@ const QueueGGC = () => {
           </Table>
         </TableContainer>
       )}
+      </div>
     </div>
   );
 };
