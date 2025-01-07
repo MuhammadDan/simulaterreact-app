@@ -193,7 +193,7 @@ function performanceMeasures(
     let processedCustomersStart = new Set();
     let processedCustomersEnd = new Set();
 
-    // Initialize arrays to ensure alignment with all customers
+    // Initialize arrays to ensure alignment with all customersf
     startTime = Array(arrivalTime.length).fill(null);
     endingTime = Array(arrivalTime.length).fill(null);
     turnAroundTime = [];

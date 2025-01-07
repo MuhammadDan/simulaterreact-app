@@ -110,6 +110,7 @@ const QueueGGC = () => {
   };
 
   return (
+    <>
     <div className="min-h-screen bg-gray-100 flex items-center justify-center">
       <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
       <h1 className="text-2xl font-bold mb-4">G/G/c Queuing Model Simulator</h1>
@@ -171,28 +172,29 @@ const QueueGGC = () => {
           Submit
         </Button>
         </form>
-      {data && (
-        <TableContainer component={Paper}>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <StyledTableCell>Metric</StyledTableCell>
-                <StyledTableCell>Value</StyledTableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {Object.entries(data).map(([key, value]) => (
-                <StyledTableRow key={key}>
-                  <StyledTableCell>{key}</StyledTableCell>
-                  <StyledTableCell>{value}</StyledTableCell>
-                </StyledTableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      )}
       </div>
     </div>
+     {data && (
+      <TableContainer component={Paper}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              {Object.keys(data).map((key) => (
+                <StyledTableCell key={key}>{key}</StyledTableCell>
+              ))}
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            <TableRow>
+              {Object.values(data).map((value, index) => (
+                <StyledTableCell key={index}>{value}</StyledTableCell>
+              ))}
+            </TableRow>
+          </TableBody>
+        </Table>
+      </TableContainer>
+    )}
+    </>
   );
 };
 

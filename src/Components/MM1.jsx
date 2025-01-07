@@ -5,8 +5,8 @@ import TableCell, { tableCellClasses } from '@mui/material/TableCell';
 import { styled } from '@mui/material/styles';
 const StyledTableCell = styled(TableCell)(({ }) => ({
     [`&.${tableCellClasses.head}`]: {
-      backgroundColor: "#000",
-      color:'#fff'
+      backgroundColor: "#1565c0",
+      color:'#000'
     },
     [`&.${tableCellClasses.body}`]: {
       fontSize: 14,
